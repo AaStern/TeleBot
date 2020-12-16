@@ -1,0 +1,70 @@
+import telebot
+import html5lib
+import re,os,sys
+import urllib.request
+
+from bs4 import BeautifulSoup
+from telebot import types
+
+bot=telebot.TeleBot('1488369160:AAHcVInkMPBn6dQBIpxcuS4nOYWZeTr6lC8')
+
+keyboard = telebot.types.ReplyKeyboardMarkup(True, True)
+keyboard.row('Уникальный предмет')
+keyboard.row('Случайная страница')
+keyboard.row('Лабиринт')
+
+@bot.message_handler(commands=['start'])
+def welcome(message):
+    bot.send_message(message.chat.id, 'Привет, этот бот - лабораторная работа, и если ты случайно его нашел - я только начал над ним только начал работать, так что его функционал может быть ограничен :)')
+    bot.send_message(message.chat.id, 'Что нужно найти?', reply_markup=keyboard)
+    decision(message)
+
+def decision(message):
+    t=message.text
+    bot.register_next_step_handler(message, decision)
+    if t == 'Уникальный предмет':
+        #unique(message)
+        bot.send_message(message.chat.id, 'Какой уникальный предмет Вы хотите найти?')
+        bot.register_next_step_handler(message, unique)
+    elif t == 'Случайная страница':
+        random(message)
+        #bot.register_next_step_handler(message, random)
+    elif t == 'Лабиринт':
+        lab(message)
+        #bot.register_next_step_handler(message, lab)
+
+@bot.message_handler(commands=['random'])
+
+def random(message):
+    bot.send_message(message.chat.id, 'https://pathofexile.gamepedia.com/Special:Random')
+    bot.send_message(message.chat.id, 'Что нужно найти?', reply_markup=keyboard)
+    pass
+
+@bot.message_handler(commands=['lab'])
+
+def lab(message):
+    bot.send_message(message.chat.id, 'Это меню находится в разработке')
+    bot.send_message(message.chat.id, 'Что нужно найти?', reply_markup=keyboard)
+    pass
+
+@bot.message_handler(commands=['unique'])
+def unique(message):
+    
+    link = ''
+    sq='https://pathofexile.gamepedia.com/Special:Search?search='
+    for x in message.text:
+        if x == ' ':
+            sq+='+'
+        else:
+            sq+=x
+    sauce = urllib.request.urlopen(sq)
+    soup = BeautifulSoup(sauce, 'lxml')
+
+    body=soup.body
+    for url in body.find_all(attrs={"data-position": 1}):
+        link = url.get('href')
+    bot.send_message(message.chat.id, link)
+    bot.send_message(message.chat.id, 'Что нужно найти?', reply_markup=keyboard)
+    pass      
+
+bot.polling(none_stop=True)
