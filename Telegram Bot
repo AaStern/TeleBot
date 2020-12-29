@@ -11,7 +11,6 @@ bot=telebot.TeleBot('1488369160:AAHcVInkMPBn6dQBIpxcuS4nOYWZeTr6lC8')
 keyboard = telebot.types.ReplyKeyboardMarkup(True, True)
 keyboard.row('Уникальный предмет')
 keyboard.row('Случайная страница')
-keyboard.row('Лабиринт')
 
 @bot.message_handler(commands=['start'])
 def welcome(message):
@@ -23,27 +22,15 @@ def decision(message):
     t=message.text
     bot.register_next_step_handler(message, decision)
     if t == 'Уникальный предмет':
-        #unique(message)
         bot.send_message(message.chat.id, 'Какой уникальный предмет Вы хотите найти?')
         bot.register_next_step_handler(message, unique)
     elif t == 'Случайная страница':
         random(message)
-        #bot.register_next_step_handler(message, random)
-    elif t == 'Лабиринт':
-        lab(message)
-        #bot.register_next_step_handler(message, lab)
+
 
 @bot.message_handler(commands=['random'])
-
 def random(message):
     bot.send_message(message.chat.id, 'https://pathofexile.gamepedia.com/Special:Random')
-    bot.send_message(message.chat.id, 'Что нужно найти?', reply_markup=keyboard)
-    pass
-
-@bot.message_handler(commands=['lab'])
-
-def lab(message):
-    bot.send_message(message.chat.id, 'Это меню находится в разработке')
     bot.send_message(message.chat.id, 'Что нужно найти?', reply_markup=keyboard)
     pass
 
@@ -66,5 +53,9 @@ def unique(message):
     bot.send_message(message.chat.id, link)
     bot.send_message(message.chat.id, 'Что нужно найти?', reply_markup=keyboard)
     pass      
+
+@bot.message_handler(content_types=['photo', 'audio', 'voice', 'document', 'sticker'])
+def unknown(message):
+    bot.send_message(message.chat.id, 'Не могу обработать ваш запрос')
 
 bot.polling(none_stop=True)
